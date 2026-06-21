@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>CalcMind — Smart Calculator</title>
+
+  <!-- Google Fonts: Space Grotesk for digits/display, Inter for UI text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============ AMBIENT BACKGROUND ============ -->
+  <!-- Gradient backdrop + floating particle canvas, purely decorative -->
+  <div class="bg-gradient" aria-hidden="true"></div>
+  <canvas id="particles" aria-hidden="true"></canvas>
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-orb"></span>
+      <span class="brand-name">CalcMind</span>
+    </div>
+
+    <div class="topbar-actions">
+      <!-- Theme switcher -->
+      <button id="themeToggle" class="icon-btn" title="Toggle theme" aria-label="Toggle dark/light theme">
+        <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+
+      <!-- Tools menu (converters/calculators) -->
+      <button id="toolsToggle" class="icon-btn" title="More tools" aria-label="Open tools menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+      </button>
+
+      <!-- History panel toggle -->
+      <button id="historyToggle" class="icon-btn" title="History" aria-label="Open history panel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ MAIN STAGE ============ -->
+  <main class="stage">
+
+    <!-- ============ CALCULATOR CARD ============ -->
+    <section class="calc-card" id="calcCard">
+
+      <!-- Mode pills: Standard / Scientific / AI -->
+      <div class="mode-row" role="tablist" aria-label="Calculator mode">
+        <button class="mode-pill active" data-mode="standard" role="tab" aria-selected="true">Standard</button>
+        <button class="mode-pill" data-mode="scientific" role="tab" aria-selected="false">Scientific</button>
+        <button class="mode-pill" data-mode="ai" role="tab" aria-selected="false">Ask CalcMind</button>
+      </div>
+
+      <!-- ===== DISPLAY ===== -->
+      <div class="display" id="display">
+        <div class="display-top">
+          <span class="expr" id="expression" aria-live="off"></span>
+          <button class="mic-btn" id="micBtn" title="Voice input" aria-label="Voice input">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="display-main">
+          <span class="result" id="result">0</span>
+        </div>
+
+        <div class="display-bottom">
+          <span class="ghost-preview" id="ghostPreview" aria-live="off"></span>
+          <div class="display-actions">
+            <button class="chip-btn" id="copyBtn" title="Copy result">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              <span>Copy</span>
+            </button>
+            <button class="chip-btn" id="speakBtn" title="Speak result">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+              <span>Speak</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== AI NATURAL LANGUAGE PANEL ===== -->
+      <div class="ai-panel" id="aiPanel">
+        <div class="ai-input-row">
+          <input type="text" id="aiInput" class="ai-input" placeholder='Try "20% of 500" or "square root of 144"' autocomplete="off" />
+          <button class="ai-send" id="aiSend" aria-label="Ask Nova">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <div class="ai-suggestions" id="aiSuggestions"></div>
+        <div class="ai-answer" id="aiAnswer"></div>
+      </div>
+
+      <!-- ===== SCIENTIFIC ROW (toggle-able) ===== -->
+      <div class="sci-row" id="sciRow">
+        <button class="btn fn" data-action="sin">sin</button>
+        <button class="btn fn" data-action="cos">cos</button>
+        <button class="btn fn" data-action="tan">tan</button>
+        <button class="btn fn" data-action="log">log</button>
+        <button class="btn fn" data-action="ln">ln</button>
+        <button class="btn fn" data-value="(">(</button>
+        <button class="btn fn" data-value=")">)</button>
+        <button class="btn fn" data-action="pow">xʸ</button>
+        <button class="btn fn" data-action="fact">n!</button>
+        <button class="btn fn" data-value="π">π</button>
+        <button class="btn fn" data-value="e">e</button>
+        <button class="btn fn" data-action="sqrt">√</button>
+      </div>
+
+      <!-- ===== MAIN KEYPAD ===== -->
+      <div class="keypad" id="keypad">
+        <button class="btn util" data-action="clear">AC</button>
+        <button class="btn util" data-action="backspace">⌫</button>
+        <button class="btn util" data-action="percent">%</button>
+        <button class="btn op" data-value="÷">÷</button>
+
+        <button class="btn num" data-value="7">7</button>
+        <button class="btn num" data-value="8">8</button>
+        <button class="btn num" data-value="9">9</button>
+        <button class="btn op" data-value="×">×</button>
+
+        <button class="btn num" data-value="4">4</button>
+        <button class="btn num" data-value="5">5</button>
+        <button class="btn num" data-value="6">6</button>
+        <button class="btn op" data-value="-">−</button>
+
+        <button class="btn num" data-value="1">1</button>
+        <button class="btn num" data-value="2">2</button>
+        <button class="btn num" data-value="3">3</button>
+        <button class="btn op" data-value="+">+</button>
+
+        <button class="btn num zero" data-value="0">0</button>
+        <button class="btn num" data-value=".">.</button>
+        <button class="btn equals" data-action="equals" id="equalsBtn">=</button>
+      </div>
+    </section>
+
+    <!-- ============ HISTORY PANEL (slides in) ============ -->
+    <aside class="history-panel" id="historyPanel">
+      <div class="history-header">
+        <h2>History</h2>
+        <button class="icon-btn small" id="closeHistory" aria-label="Close history">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <input type="text" id="historySearch" class="history-search" placeholder="Search history…" autocomplete="off" />
+      <div class="history-list" id="historyList"></div>
+      <button class="text-btn danger" id="clearHistory">Clear all history</button>
+    </aside>
+
+    <!-- ============ TOOLS PANEL (converters/calculators) ============ -->
+    <aside class="tools-panel" id="toolsPanel">
+      <div class="history-header">
+        <h2>Tools</h2>
+        <button class="icon-btn small" id="closeTools" aria-label="Close tools">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="tools-grid" id="toolsGrid">
+        <button class="tool-card" data-tool="currency">
+          <span class="tool-icon">💱</span><span>Currency</span>
+        </button>
+        <button class="tool-card" data-tool="unit">
+          <span class="tool-icon">📐</span><span>Unit Convert</span>
+        </button>
+        <button class="tool-card" data-tool="age">
+          <span class="tool-icon">🎂</span><span>Age Calc</span>
+        </button>
+        <button class="tool-card" data-tool="emi">
+          <span class="tool-icon">🏦</span><span>EMI Calc</span>
+        </button>
+        <button class="tool-card" data-tool="bmi">
+          <span class="tool-icon">⚖️</span><span>BMI Calc</span>
+        </button>
+      </div>
+
+      <!-- Tool content area, populated dynamically by JS -->
+      <div class="tool-content" id="toolContent"></div>
+    </aside>
+
+  </main>
+
+  <!-- ============ AI ASSISTANT FLOATING ORB ============ -->
+  <button class="ai-orb" id="aiOrb" aria-label="Open Nova assistant">
+    <span class="orb-core"></span>
+    <span class="orb-ring"></span>
+  </button>
+
+  <!-- Toast for copy / errors -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
