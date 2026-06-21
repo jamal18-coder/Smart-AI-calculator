@@ -1,8 +1,8 @@
 A modern AI powerd calculator with :
-Standard Calculator
-Scientific Calculator
-Voice Input 
-AI Assistant
+Standard Calculator, 
+Scientific Calculato, 
+Voice Input, 
+AI Assistant, 
 Modern Animated UI
 
 # Technologies
